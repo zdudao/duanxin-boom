@@ -1,21 +1,58 @@
-name: Python 程序自动运行
+# GitHub Actions 每日定时运行配置
+# 每天自动运行1小时，处理医院网址，记录进度
+
+name: 医院联系每日定时任务
+
+# 定时触发：每天早上8点运行
 on:
-  push:
-    branches:
-      - main  # 当代码推送到 main 分支时触发自动运行，也可以改成其他分支名
+  schedule:
+    - cron: '0 8 * * *'  # 每天早上8点（UTC时间，北京时间是16点）
+  workflow_dispatch:  # 也支持手动触发
+
+# 任务配置
 jobs:
-  build:
-    runs-on: ubuntu-latest  # 运行在最新的 Ubuntu 系统环境下
+  daily-hospital-contact:
+    runs-on: ubuntu-latest  # 使用最新的Ubuntu系统
+    timeout-minutes: 65  # 设置65分钟超时（比1小时多5分钟缓冲）
+    
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4  # 把仓库里的代码拉取到运行环境中
-      - name: 设置 Python 环境
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'  # 设置 Python 版本，根据你的程序需求选择
-      - name: 安装依赖
-        run: |
-          python -m pip install --upgrade pip
-          pip install fake-useragent DrissionPage  # 安装程序所需的依赖包，按实际情况添加
-      - name: 运行程序
-        run: python main.py  # 运行你的主程序，若文件名不是 main.py，要改成实际文件名
+    - name: 检出代码
+      uses: actions/checkout@v3
+      
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # 使用Python 3.9版本
+        
+    - name: 安装依赖包
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 下载之前的进度
+      uses: actions/download-artifact@v3
+      continue-on-error: true  # 如果没有历史进度也没关系
+      with:
+        name: progress-data
+        path: ./
+        
+    - name: 运行医院联系程序（限时1小时）
+      run: |
+        echo "开始运行医院联系程序..."
+        timeout 3600s python github_daily_run.py || echo "程序运行1小时结束"
+        
+    - name: 保存进度数据
+      uses: actions/upload-artifact@v3
+      with:
+        name: progress-data
+        path: |
+          progress.json
+          daily_log.txt
+        retention-days: 30  # 保存30天
+        
+    - name: 上传运行日志
+      uses: actions/upload-artifact@v3
+      with:
+        name: run-logs-${{ github.run_number }}
+        path: daily_log.txt
+        retention-days: 7  # 日志保存7天
