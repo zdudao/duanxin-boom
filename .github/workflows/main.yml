@@ -1,0 +1,21 @@
+name: Python 程序自动运行
+on:
+  push:
+    branches:
+      - main  # 当代码推送到 main 分支时触发自动运行，也可以改成其他分支名
+jobs:
+  build:
+    runs-on: ubuntu-latest  # 运行在最新的 Ubuntu 系统环境下
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4  # 把仓库里的代码拉取到运行环境中
+      - name: 设置 Python 环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # 设置 Python 版本，根据你的程序需求选择
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install fake-useragent DrissionPage  # 安装程序所需的依赖包，按实际情况添加
+      - name: 运行程序
+        run: python main.py  # 运行你的主程序，若文件名不是 main.py，要改成实际文件名
