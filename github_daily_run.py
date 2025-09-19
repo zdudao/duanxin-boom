@@ -24,6 +24,9 @@ TEL_NAME = '张宇'
 PROGRESS_FILE = 'progress.json'
 LOG_FILE = 'daily_log.txt'
 
+# 全局变量
+TIMEOUT_OCCURRED = False
+
 def write_log(message):
     """写日志 - 记录运行情况"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -74,11 +77,11 @@ def create_browser():
         co.set_no_imgs(False)  # 加载图片
         co.set_user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
         
-        # 内存和性能优化
-        co.add_argument('--no-sandbox')  # 服务器环境需要
-        co.add_argument('--disable-dev-shm-usage')
-        co.add_argument('--disable-gpu')
-        co.add_argument('--disable-extensions')
+        # 内存和性能优化 - 使用正确的set_argument方法
+        co.set_argument('--no-sandbox')  # 服务器环境需要
+        co.set_argument('--disable-dev-shm-usage')
+        co.set_argument('--disable-gpu')
+        co.set_argument('--disable-extensions')
         
         return ChromiumPage(addr_driver_opts=co)
         
@@ -181,6 +184,7 @@ def main():
         # 处理网址
         processed_count = 0
         success_count = 0
+        i = start_index  # 初始化循环变量
         
         for i in range(start_index, total_urls):
             if TIMEOUT_OCCURRED:
