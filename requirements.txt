@@ -1,0 +1,17 @@
+# 项目依赖包 - 适配GitHub Actions
+# 安装命令：pip install -r requirements.txt
+
+# 定时任务调度
+APScheduler==3.10.1
+
+# 网页自动化操作（支持无头浏览器）
+DrissionPage==3.2.34
+
+# 随机UserAgent生成
+fake_useragent==1.2.1
+
+# HTTP网络请求
+Requests==2.31.0
+
+# 额外依赖（GitHub Actions环境需要）
+urllib3>=1.26.0
